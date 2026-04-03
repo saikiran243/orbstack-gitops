@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-nginx
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/saikiran243/orbstack-gitops.git
+    targetRevision: HEAD
+    path: workloads/nginx # Points to the nginx folder!
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true

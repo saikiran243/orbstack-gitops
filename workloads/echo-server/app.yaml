@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitops-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitops-echo
+  template:
+    metadata:
+      labels:
+        app: gitops-echo
+    spec:
+      containers:
+      - name: echo
+        image: ealen/echo-server:latest
+        ports:
+        - containerPort: 80
