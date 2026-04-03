@@ -1,6 +1,6 @@
 # 1. Tracking and Global Limits
 apiVersion: configuration.konghq.com/v1
-kind: KongPlugin
+kind: KongClusterPlugin
 metadata:
   name: request-tracker
 plugin: correlation-id
@@ -10,7 +10,7 @@ config:
   echo_downstream: true
 ---
 apiVersion: configuration.konghq.com/v1
-kind: KongPlugin
+kind: KongClusterPlugin
 metadata:
   name: default-rate-limit
 plugin: rate-limiting
@@ -19,7 +19,7 @@ config:
   policy: local
 ---
 apiVersion: configuration.konghq.com/v1
-kind: KongPlugin
+kind: KongClusterPlugin
 metadata:
   name: auth-rule
 plugin: key-auth
@@ -27,7 +27,7 @@ plugin: key-auth
 # 2. Pro User Override
 ---
 apiVersion: configuration.konghq.com/v1
-kind: KongPlugin
+kind: KongClusterPlugin
 metadata:
   name: pro-rate-limit
 plugin: rate-limiting
