@@ -1,0 +1,77 @@
+# 1. Tracking and Global Limits
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: request-tracker
+plugin: correlation-id
+config:
+  header_name: X-Request-ID
+  generator: uuid
+  echo_downstream: true
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: default-rate-limit
+plugin: rate-limiting
+config:
+  minute: 5
+  policy: local
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: auth-rule
+plugin: key-auth
+
+# 2. Pro User Override
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: pro-rate-limit
+plugin: rate-limiting
+config:
+  minute: 100
+  policy: local
+
+# 3. Users and Secrets
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: free-user-key
+  labels:
+    konghq.com/credential: key-auth
+stringData:
+  key: free-key
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: free-user
+  annotations:
+    kubernetes.io/ingress.class: kong
+username: free-user
+credentials:
+  - free-user-key
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pro-user-key
+  labels:
+    konghq.com/credential: key-auth
+stringData:
+  key: pro-key
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: pro-user
+  annotations:
+    kubernetes.io/ingress.class: kong
+    konghq.com/plugins: pro-rate-limit
+username: pro-user
+credentials:
+  - pro-user-key
