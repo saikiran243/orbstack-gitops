@@ -4,3 +4,5 @@ namePrefix: dev-
 resources:
   - ../../base
   - ingress.yaml
+commonLabels:
+  env: dev

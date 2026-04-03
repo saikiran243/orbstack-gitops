@@ -7,3 +7,5 @@ resources:
 replicas:
   - name: foo-app # Make Stage High-Availability
     count: 3
+commonLabels:
+  env: stage
