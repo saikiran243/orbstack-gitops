@@ -7,7 +7,8 @@ spec:
   project: default
   source:
     repoURL: https://charts.konghq.com
-    chart: ingress
+    targetRevision: 2.38.0  # <--- Put the version back
+    chart: kong             # <--- Change this from 'ingress' to 'kong'
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
