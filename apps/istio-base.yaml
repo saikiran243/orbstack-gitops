@@ -18,3 +18,13 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true  # <--- THIS IS THE MAGIC FIX
+    # TELL ARGO TO IGNORE DYNAMIC CERTIFICATES
+  ignoreDifferences:
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[].clientConfig.caBundle'
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+      jqPathExpressions:
+        - '.webhooks[].clientConfig.caBundle'
