@@ -17,14 +17,12 @@ spec:
       prune: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  # <--- THIS IS THE MAGIC FIX
-    # TELL ARGO TO IGNORE DYNAMIC CERTIFICATES
+      - ServerSideApply=true
+  # THE ULTIMATE ISTIO IGNORE BLOCK
   ignoreDifferences:
     - group: admissionregistration.k8s.io
       kind: ValidatingWebhookConfiguration
-      jqPathExpressions:
-        - '.webhooks[].clientConfig.caBundle'
-    - group: admissionregistration.k8s.io
-      kind: MutatingWebhookConfiguration
-      jqPathExpressions:
-        - '.webhooks[].clientConfig.caBundle'
+      name: istiod-default-validator
+      jsonPointers:
+        - /webhooks/0/clientConfig/caBundle
+        - /webhooks/0/failurePolicy
