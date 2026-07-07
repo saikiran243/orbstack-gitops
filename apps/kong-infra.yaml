@@ -11,16 +11,16 @@ spec:
     chart: kong
     helm:
       parameters:
-        # Tell AWS to provision a Network Load Balancer
-        - name: proxy.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-type
-          value: "nlb"
-        - name: proxy.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-scheme
-          value: "internet-facing"
+        # 1. Strip out the AWS annotations
+        # 2. Tell Kong to only create an internal IP
+        - name: proxy.type
+          value: "ClusterIP"
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
   syncPolicy:
     automated:
       prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
