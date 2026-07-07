@@ -6,7 +6,7 @@ metadata:
   namespace: "datadog"
 spec:
   global:
-    clusterName: "orbstack-local" # <-- Updated to your local cluster
+    clusterName: "amazing-folk-goose"
     site: "us5.datadoghq.com"     # <-- Datadog US5 region (from your portal)
     credentials:
       apiSecret:

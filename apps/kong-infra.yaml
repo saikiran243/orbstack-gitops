@@ -7,8 +7,15 @@ spec:
   project: default
   source:
     repoURL: https://charts.konghq.com
-    targetRevision: 2.38.0  # <--- Put the version back
-    chart: kong             # <--- Change this from 'ingress' to 'kong'
+    targetRevision: 2.38.0
+    chart: kong
+    helm:
+      parameters:
+        # Tell AWS to provision a Network Load Balancer
+        - name: proxy.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-type
+          value: "nlb"
+        - name: proxy.annotations.service\.beta\.kubernetes\.io/aws-load-balancer-scheme
+          value: "internet-facing"
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
