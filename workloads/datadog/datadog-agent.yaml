@@ -1,0 +1,19 @@
+# workloads/datadog/datadog-agent.yaml
+kind: "DatadogAgent"
+apiVersion: "datadoghq.com/v2alpha1"
+metadata:
+  name: "datadog"
+  namespace: "datadog"
+spec:
+  global:
+    clusterName: "orbstack-local" # <-- Updated to your local cluster
+    site: "us5.datadoghq.com"     # <-- Datadog US5 region (from your portal)
+    credentials:
+      apiSecret:
+        secretName: "datadog-secret"
+        keyName: "api-key"
+  features:
+    clusterChecks:
+      enabled: true
+    orchestratorExplorer:
+      enabled: true

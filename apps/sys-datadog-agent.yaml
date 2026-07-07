@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-datadog-agent
+  namespace: argocd
+  # We use a sync-wave to ensure Argo installs the Operator BEFORE it tries to install this!
+  annotations:
+    argocd.argoproj.io/sync-wave: "5" 
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/saikiran243/orbstack-gitops.git
+    targetRevision: HEAD
+    path: workloads/datadog
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: datadog
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
