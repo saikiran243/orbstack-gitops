@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://helm.datadoghq.com
-    targetRevision: 1.9.0  # Operator Helm Chart version
+    targetRevision: 2.24.0  # Operator Helm Chart version
     chart: datadog-operator
   destination:
     server: https://kubernetes.default.svc
