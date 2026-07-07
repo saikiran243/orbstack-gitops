@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sys-datadog
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://helm.datadoghq.com
+    targetRevision: 3.56.2  # Use a stable version of the chart
+    chart: datadog
+    helm:
+      parameters:
+        # Tell Datadog to use the secret we created manually
+        - name: datadog.apiKeyExistingSecret
+          value: datadog-secret
+        # Name your cluster so it appears clearly in the Datadog UI
+        - name: datadog.clusterName
+          value: orbstack-local
+        # Ensure it connects to the correct Datadog region (change if your account is in EU)
+        - name: datadog.site
+          value: datadoghq.com
+        # Disable heavy features not included in the Free Tier to save local M1 resources
+        - name: datadog.logs.enabled
+          value: "false"
+        - name: datadog.apm.portEnabled
+          value: "false"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: datadog
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
