@@ -3,39 +3,46 @@
 This repository contains the infrastructure-as-code for a scalable, self-healing MLOps platform deployed on **AWS EKS**.
 
 ## 🚀 Architecture Overview
-- **GitOps Engine:** [Argo CD](https://argo-cd.readthedocs.io/) continuously syncs this repository with the EKS cluster state.
-- **Service Mesh:** [Istio](https://istio.io/) provides mTLS security and internal traffic management via Envoy sidecars.
-- **API Gateway:** [Kong](https://konghq.com/) manages traffic ingress and rate limiting.
-- **Observability:** [Datadog](https://www.datadoghq.com/) provides full-stack monitoring (metrics, logs, traces) with Kubernetes Autodiscovery.
-- **Compute:** [AWS EKS Auto Mode](https://docs.aws.amazon.com/eks/latest/userguide/eks-auto-mode.html) for dynamic, minimal-compute scaling.
+- **GitOps Engine:** Argo CD (State management).
+- **Service Mesh:** Istio (mTLS & Traffic routing).
+- **API Gateway:** Kong (Rate limiting & Proxying).
+- **Observability:** Datadog (Metrics, Logs, & Automated Traces).
+- **Compute:** AWS EKS Auto Mode (On-demand resource scaling).
 
 ## ⚙️ Platform Functionality
 
-### 1. Zero-Touch Infrastructure (GitOps)
-- **Continuous Reconciliation:** Any change committed to this repository is automatically synchronized to the EKS cluster by Argo CD.
-- **Drift Detection:** Argo CD monitors the live state of the cluster; if a manual configuration change occurs, the platform automatically "self-heals" back to the defined Git state.
+### 1. Multi-Environment Strategy (Kustomize)
+We utilize **Kustomize** to manage `dev` and `stage` environments:
+- **Base Layer:** Standard application manifests.
+- **Overlays:** Environment-specific patches (e.g., replica counts, CPU/Memory limits, ingress rules).
+- **Benefit:** DRY approach allows for rapid, consistent environment promotion.
 
-### 2. Intelligent Traffic & Security (Istio)
-- **Zero Trust Networking:** Istio enforces mTLS (Mutual TLS) on all internal service-to-service communication, ensuring traffic is encrypted and verified.
-- **Canary Deployments:** Traffic routing can be weighted (e.g., 95/5) to allow for safe testing of new application versions in production.
-- **Automated Observability:** Envoy proxies automatically capture request latency, error rates, and traffic volume, exporting this data to Datadog without requiring application code changes.
+### 2. Zero-Touch Infrastructure (GitOps)
+- **Continuous Reconciliation:** Any change to this repo is auto-synced to EKS.
+- **Drift Detection:** Argo CD monitors the live state, self-healing if manual configuration changes are detected.
 
-### 3. High Availability & Self-Healing
-- **Failure Recovery:** Every workload utilizes **Liveness Probes**. If a process deadlocks or hits a memory limit, Kubernetes automatically kills the unhealthy pod and provisions a fresh replacement.
-- **Scaling:** EKS Auto Mode observes workload resource requests (`cpu`/`memory`) and provisions the necessary compute capacity (down to micro-instances) on-demand.
+### 3. Intelligent Traffic & Security (Istio)
+- **Zero Trust Networking:** mTLS enforcement for all service communication.
+- **Automated Observability:** Sidecar proxies capture latency/traffic volume, streaming directly to Datadog.
 
-### 4. Enterprise Observability (Datadog)
-- **Unified Service Tagging:** Standardized tags (`env`, `service`, `version`) allow for instant cross-service analysis.
-- **Proactive Alerting:** Datadog tracks pod lifecycle events, alerting engineers on crash loops or abnormal resource consumption trends before they impact the user experience.
+### 4. High Availability & Self-Healing
+- **Failure Recovery:** Liveness Probes detect application deadlocks; Kubernetes replaces failed pods instantly.
+- **Scaling:** EKS Auto Mode provisions compute capacity on-demand.
+
+### 5. Disaster Recovery & Portability
+- **Environment Parity:** Because we use GitOps and Kustomize, we can rebuild the entire production environment in a new EKS cluster from scratch in under 10 minutes.
+- **Portability:** Our stack is cloud-agnostic; while currently running on EKS, the manifests are compatible with any CNCF-compliant Kubernetes distribution.
+
+### 6. Developer Workflow (Day 2 Operations)
+- **Seamless Testing:** Using `kubectl port-forward` allows developers to tunnel into the secure internal mesh for testing without exposing services to the public internet.
+- **Rapid Debugging:** Direct `kubectl exec` access to containers is preserved for live troubleshooting, while Datadog logs provide persistent history after pod termination.
 
 ---
 
-## 🛠 Setup & Deployment
+## 🏗 Setup & Deployment
 1. **Bootstrap Argo CD:**
    `kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml`
-
 2. **Configure Datadog:**
    `kubectl create secret generic datadog-secret --from-literal=api-key="<YOUR_KEY>" -n datadog`
-
 3. **Trigger GitOps Sync:**
    `kubectl apply -f bootstrap/enterprise-bootstrap.yaml`
