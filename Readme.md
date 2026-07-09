@@ -1,33 +1,41 @@
 # EKS MLOps Platform (GitOps-Driven)
 
-This repository contains the infrastructure-as-code for a scalable, self-healing MLOps platform deployed on **AWS EKS**. The platform utilizes a GitOps methodology to maintain cluster state, integrated with Datadog for enterprise-grade observability.
+This repository contains the infrastructure-as-code for a scalable, self-healing MLOps platform deployed on **AWS EKS**.
 
 ## 🚀 Architecture Overview
 - **GitOps Engine:** [Argo CD](https://argo-cd.readthedocs.io/) continuously syncs this repository with the EKS cluster state.
-- **Service Mesh:** [Istio](https://istio.io/) provides mTLS security and internal traffic management.
+- **Service Mesh:** [Istio](https://istio.io/) provides mTLS security and internal traffic management via Envoy sidecars.
 - **API Gateway:** [Kong](https://konghq.com/) manages traffic ingress and rate limiting.
 - **Observability:** [Datadog](https://www.datadoghq.com/) provides full-stack monitoring (metrics, logs, traces) with Kubernetes Autodiscovery.
 - **Compute:** [AWS EKS Auto Mode](https://docs.aws.amazon.com/eks/latest/userguide/eks-auto-mode.html) for dynamic, minimal-compute scaling.
 
-## 🛠 Platform Capabilities
+## ⚙️ Platform Functionality
 
-### 1. Declarative Infrastructure (GitOps)
-The entire cluster configuration is version-controlled. Argo CD ensures that any change pushed to this repo is automatically applied to EKS, eliminating configuration drift.
+### 1. Zero-Touch Infrastructure (GitOps)
+- **Continuous Reconciliation:** Any change committed to this repository is automatically synchronized to the EKS cluster by Argo CD.
+- **Drift Detection:** Argo CD monitors the live state of the cluster; if a manual configuration change occurs, the platform automatically "self-heals" back to the defined Git state.
 
-### 2. Automated Self-Healing
-Every application workload is configured with **Liveness Probes**. 
-* **Failure Scenario:** If an inference container exhausts memory (OOMKilled) or deadlocks, Kubernetes detects the health failure and automatically terminates and recreates the pod within seconds.
-* **Resilience:** This zero-touch recovery ensures high availability for mission-critical computer vision pipelines.
+### 2. Intelligent Traffic & Security (Istio)
+- **Zero Trust Networking:** Istio enforces mTLS (Mutual TLS) on all internal service-to-service communication, ensuring traffic is encrypted and verified.
+- **Canary Deployments:** Traffic routing can be weighted (e.g., 95/5) to allow for safe testing of new application versions in production.
+- **Automated Observability:** Envoy proxies automatically capture request latency, error rates, and traffic volume, exporting this data to Datadog without requiring application code changes.
 
-### 3. Enterprise Observability
-Datadog integration leverages **Unified Service Tagging**. By using Kubernetes annotations, all services are automatically identified in Datadog, allowing for:
-* Real-time monitoring of CPU/Memory spikes during inference tasks.
-* Automated alerting on Pod CrashLoops.
-* Visual dependency mapping via Istio's sidecar proxies.
+### 3. High Availability & Self-Healing
+- **Failure Recovery:** Every workload utilizes **Liveness Probes**. If a process deadlocks or hits a memory limit, Kubernetes automatically kills the unhealthy pod and provisions a fresh replacement.
+- **Scaling:** EKS Auto Mode observes workload resource requests (`cpu`/`memory`) and provisions the necessary compute capacity (down to micro-instances) on-demand.
 
-## 📂 Repository Structure
-```text
-├── apps/               # Argo CD Application definitions
-├── bootstrap/          # Enterprise bootstrap configuration
-├── workloads/          # Application manifests (Dev/Stage/Prod overlays)
-└── README.md
+### 4. Enterprise Observability (Datadog)
+- **Unified Service Tagging:** Standardized tags (`env`, `service`, `version`) allow for instant cross-service analysis.
+- **Proactive Alerting:** Datadog tracks pod lifecycle events, alerting engineers on crash loops or abnormal resource consumption trends before they impact the user experience.
+
+---
+
+## 🛠 Setup & Deployment
+1. **Bootstrap Argo CD:**
+   `kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml`
+
+2. **Configure Datadog:**
+   `kubectl create secret generic datadog-secret --from-literal=api-key="<YOUR_KEY>" -n datadog`
+
+3. **Trigger GitOps Sync:**
+   `kubectl apply -f bootstrap/enterprise-bootstrap.yaml`
