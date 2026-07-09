@@ -33,10 +33,6 @@ We utilize **Kustomize** to manage `dev` and `stage` environments:
 - **Environment Parity:** Because we use GitOps and Kustomize, we can rebuild the entire production environment in a new EKS cluster from scratch in under 10 minutes.
 - **Portability:** Our stack is cloud-agnostic; while currently running on EKS, the manifests are compatible with any CNCF-compliant Kubernetes distribution.
 
-### 6. Developer Workflow (Day 2 Operations)
-- **Seamless Testing:** Using `kubectl port-forward` allows developers to tunnel into the secure internal mesh for testing without exposing services to the public internet.
-- **Rapid Debugging:** Direct `kubectl exec` access to containers is preserved for live troubleshooting, while Datadog logs provide persistent history after pod termination.
-
 ---
 
 ## 🏗 Setup & Deployment
